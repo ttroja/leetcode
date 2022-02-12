@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.6)
 project (test) 
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_INSTALL_RPATH "$ORIGIN")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 
-#set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
-#set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install")
+if (NOT CMAKE_BUILD_TYPE)
+  message(STATUS "CMAKE_BUILD_TYPE not set, use RelWithDebInfo")
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+elseif (CMAKE_BUILD_TYPE MATCHES "Release")  
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+
 set(CMAKE_INSTALL_PREFIX "../install")
 
 add_compile_options(-static-libstdc++)
@@ -20,6 +26,5 @@ file(GLOB CPP_FILES ./src/*.cpp)
 foreach(TEST_SOURCE ${CPP_FILES})
   string(REGEX REPLACE ".+/(.+)\\..*" "\\1" TEST_NAME ${TEST_SOURCE})
   add_executable(${TEST_NAME} ${TEST_SOURCE})
-  target_link_libraries(${TEST_NAME} -pthread)
   install(TARGETS ${TEST_NAME} DESTINATION test)
 endforeach(TEST_SOURCE ${CPP_FILES})
